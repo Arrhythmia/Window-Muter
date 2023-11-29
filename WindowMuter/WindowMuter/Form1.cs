@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using AudioSwitcher.AudioApi;
-using System.Drawing;
 using System.Diagnostics;
 using AudioSwitcher.AudioApi.CoreAudio;
 using AudioSwitcher.AudioApi.Session;
@@ -12,21 +10,14 @@ namespace WindowMuter
 {
     public partial class Form1 : Form
     {
-
-
         // Constants for hotkey modifiers
         private const int MOD_CONTROL = 0x0002;
 
         // Windows API function imports
         [DllImport("user32.dll")]
         private static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, Keys vk);
-
-        [DllImport("user32.dll")]
-        private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
         // Constants for hotkey IDs
         private const int HOTKEY_ID = 1;
-
-
 
         [DllImport("user32.dll")]
         public static extern IntPtr GetForegroundWindow();
@@ -41,10 +32,10 @@ namespace WindowMuter
             InitializeAudioDevice();
 
             this.Resize += Form1_Resize;
+            this.Activated += Form1_Activated;
 
             this.WindowState = FormWindowState.Minimized;
             this.ShowInTaskbar = false;
-
 
             notifyIcon.Visible = true;
             notifyIcon.MouseClick += notifyIcon_MouseClick;
@@ -53,10 +44,7 @@ namespace WindowMuter
             contextMenu.Items.Add(exitMenuItem);
             notifyIcon.ContextMenuStrip = contextMenu;
 
-
             RegisterHotKey(this.Handle, HOTKEY_ID, MOD_CONTROL, Keys.M);
-
-
         }
         private void notifyIcon_MouseClick(object sender, MouseEventArgs e)
         {
@@ -73,7 +61,6 @@ namespace WindowMuter
 
         private void exitMenuItem_Click(object sender, EventArgs e)
         {
-            // Handle exit menu item click
             Application.Exit();
         }
 
@@ -82,15 +69,16 @@ namespace WindowMuter
             audioController = new CoreAudioController();
         }
 
-
+        private void Form1_Activated(object sender, EventArgs e)
+        {
+            RegisterHotKey(this.Handle, HOTKEY_ID, MOD_CONTROL, Keys.M);
+        }
         protected override void WndProc(ref Message m)
         {
             base.WndProc(ref m);
 
-            // Handle hotkey message
             if (m.Msg == 0x0312 && m.WParam.ToInt32() == HOTKEY_ID)
             {
-                // Call your method to mute/unmute the focused application
                 ToggleMuteForActiveWindow();
             }
         }
@@ -101,11 +89,7 @@ namespace WindowMuter
             RegisterHotKey(this.Handle, HOTKEY_ID, MOD_CONTROL, Keys.M);
         }
 
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            // Unregister the hotkey when the form is closing
-            UnregisterHotKey(this.Handle, HOTKEY_ID);
-        }
+
 
         private void ToggleMuteForActiveWindow()
         {
@@ -117,14 +101,6 @@ namespace WindowMuter
                 if (session.ProcessId == processId || processName == Process.GetProcessById(session.ProcessId).ProcessName)
                 {
                     session.IsMuted = !session.IsMuted;
-                    if (session.IsMuted)
-                    {
-                        statusLabel.Text = "Application Muted";
-                    }
-                    else
-                    {
-                        statusLabel.Text = "Application Unmuted";
-                    }
                     break;
                 }
             }
@@ -136,22 +112,8 @@ namespace WindowMuter
             {
                 this.ShowInTaskbar = false;
                 notifyIcon.Visible = true;
+                RegisterHotKey(this.Handle, HOTKEY_ID, MOD_CONTROL, Keys.M);
             }
-        }
-
-        private void notifyIcon_Click(object sender, EventArgs e)
-        {
-            this.WindowState = FormWindowState.Normal;
-            this.ShowInTaskbar = true;
-            notifyIcon.Visible = false;
-        }
-
-        private void notifyIcon_DoubleClick(object sender, EventArgs e)
-        {
-            // Restore the form when double-clicking the tray icon
-            this.WindowState = FormWindowState.Normal;
-            this.ShowInTaskbar = true;
-            notifyIcon.Visible = false;
         }
     }
 }
