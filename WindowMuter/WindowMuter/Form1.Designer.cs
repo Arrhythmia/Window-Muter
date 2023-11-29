@@ -31,17 +31,18 @@ namespace WindowMuter
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            this.notifyIcon2 = new System.Windows.Forms.NotifyIcon(this.components);
+            this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.statusLabel = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
-            // notifyIcon2
+            // notifyIcon
             // 
-            this.notifyIcon2.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Warning;
-            this.notifyIcon2.Text = "notifyIcon2";
-            this.notifyIcon2.Visible = true;
+            this.notifyIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Warning;
+            this.notifyIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon.Icon")));
+            this.notifyIcon.Text = "Window Muter";
+            this.notifyIcon.Visible = true;
             // 
             // statusLabel
             // 
@@ -68,7 +69,8 @@ namespace WindowMuter
             this.ClientSize = new System.Drawing.Size(440, 380);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.statusLabel);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.ShowInTaskbar = false;
@@ -82,7 +84,7 @@ namespace WindowMuter
 
         #endregion
 
-        private System.Windows.Forms.NotifyIcon notifyIcon2;
+        private System.Windows.Forms.NotifyIcon notifyIcon;
         private System.Windows.Forms.Label statusLabel;
         private System.Windows.Forms.PictureBox pictureBox1;
     }

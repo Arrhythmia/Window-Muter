@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using AudioSwitcher.AudioApi.CoreAudio;
+using AudioSwitcher.AudioApi;
 using System.Drawing;
+using System.Diagnostics;
+using AudioSwitcher.AudioApi.CoreAudio;
+using AudioSwitcher.AudioApi.Session;
+using System.Reflection;
 
 namespace WindowMuter
 {
@@ -31,37 +35,40 @@ namespace WindowMuter
         public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
         private CoreAudioController audioController;
-
-        private NotifyIcon notifyIcon;
         public Form1()
         {
             InitializeComponent();
             InitializeAudioDevice();
 
-
-
+            this.Resize += Form1_Resize;
 
             this.WindowState = FormWindowState.Minimized;
             this.ShowInTaskbar = false;
 
 
-            notifyIcon = new NotifyIcon();
-            notifyIcon.Icon = SystemIcons.Application;
             notifyIcon.Visible = true;
-            notifyIcon.Click += notifyIcon_Click;
-
-            // Set up a context menu
+            notifyIcon.MouseClick += notifyIcon_MouseClick;
             ContextMenuStrip contextMenu = new ContextMenuStrip();
             ToolStripMenuItem exitMenuItem = new ToolStripMenuItem("Exit", null, exitMenuItem_Click);
             contextMenu.Items.Add(exitMenuItem);
             notifyIcon.ContextMenuStrip = contextMenu;
 
 
-
-
             RegisterHotKey(this.Handle, HOTKEY_ID, MOD_CONTROL, Keys.M);
 
 
+        }
+        private void notifyIcon_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                typeof(NotifyIcon).GetMethod("ShowContextMenu", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(notifyIcon, null);
+            }
+            else if (e.Button == MouseButtons.Left)
+            {
+                base.WindowState = FormWindowState.Normal;
+                base.ShowInTaskbar = true;
+            }
         }
 
         private void exitMenuItem_Click(object sender, EventArgs e)
@@ -102,16 +109,14 @@ namespace WindowMuter
 
         private void ToggleMuteForActiveWindow()
         {
-            IntPtr foregroundWindow = GetForegroundWindow();
-            uint processId;
-            GetWindowThreadProcessId(foregroundWindow, out processId);
-
-            foreach (var session in audioController.DefaultPlaybackDevice.SessionController.ActiveSessions())
+            GetWindowThreadProcessId(GetForegroundWindow(), out var processId);
+            string processName = Process.GetProcessById((int)processId).ProcessName;
+            Console.WriteLine("Attempting to mute: " + Process.GetProcessById((int)processId).ProcessName);
+            foreach (IAudioSession session in audioController.DefaultPlaybackDevice.SessionController.ActiveSessions())
             {
-                if (session.ProcessId == processId)
+                if (session.ProcessId == processId || processName == Process.GetProcessById(session.ProcessId).ProcessName)
                 {
                     session.IsMuted = !session.IsMuted;
-
                     if (session.IsMuted)
                     {
                         statusLabel.Text = "Application Muted";
@@ -120,21 +125,17 @@ namespace WindowMuter
                     {
                         statusLabel.Text = "Application Unmuted";
                     }
-
-                    return;
+                    break;
                 }
             }
         }
-
-
-
 
         private void Form1_Resize(object sender, EventArgs e)
         {
             if (this.WindowState == FormWindowState.Minimized)
             {
                 this.ShowInTaskbar = false;
-                notifyIcon2.Visible = true;
+                notifyIcon.Visible = true;
             }
         }
 
@@ -142,7 +143,7 @@ namespace WindowMuter
         {
             this.WindowState = FormWindowState.Normal;
             this.ShowInTaskbar = true;
-            notifyIcon2.Visible = false;
+            notifyIcon.Visible = false;
         }
 
         private void notifyIcon_DoubleClick(object sender, EventArgs e)
