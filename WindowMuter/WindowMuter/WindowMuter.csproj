@@ -1,5 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\ILRepack.2.0.18\build\ILRepack.props" Condition="Exists('..\packages\ILRepack.2.0.18\build\ILRepack.props')" />
+  <Import Project="..\packages\ILMerge.3.0.41\build\ILMerge.props" Condition="Exists('..\packages\ILMerge.3.0.41\build\ILMerge.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -212,6 +214,16 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Harpy.CLRv4.1.0.8503.24499\build\net40\Harpy.CLRv4.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Harpy.CLRv4.1.0.8503.24499\build\net40\Harpy.CLRv4.targets'))" />
     <Error Condition="!Exists('..\packages\HotKey.1.0.8503.24499\build\net40\HotKey.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\HotKey.1.0.8503.24499\build\net40\HotKey.targets'))" />
+    <Error Condition="!Exists('..\packages\ILMerge.3.0.41\build\ILMerge.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ILMerge.3.0.41\build\ILMerge.props'))" />
+    <Error Condition="!Exists('..\packages\ILRepack.2.0.18\build\ILRepack.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ILRepack.2.0.18\build\ILRepack.props'))" />
   </Target>
   <Import Project="..\packages\HotKey.1.0.8503.24499\build\net40\HotKey.targets" Condition="Exists('..\packages\HotKey.1.0.8503.24499\build\net40\HotKey.targets')" />
+
+  <PropertyGroup>
+    <PostBuildEvent>
+      "$(SolutionDir)packages\ILRepack.2.0.18\tools\ILRepack.exe" /out:$(TargetDir)WindowMuterRelease.exe $(TargetDir)WindowMuter.exe AudioSwitcher.AudioApi.dll AudioSwitcher.AudioApi.CoreAudio.dll System.Reactive.dll  /log:$(TargetDir)ILRepack.log /targetplatform:v4 /ndebug
+    </PostBuildEvent>
+  </PropertyGroup>
+  
+  
 </Project>
