@@ -27,8 +27,8 @@ To build the project from source, follow these steps:
 
 1. Clone the repository:
 
-   ```bash 
-   git clone https://github.com/Arrhythmia/Window-Muter.git```
+   ```bash
+   git clone https://github.com/Arrhythmia/Window-Muter.git
 2. Open the solution in Visual Studio.
 3. Build the project.
 4. Run the compiled executable.
